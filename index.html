@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Timer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+    }
+
+    .dark {
+      --bg: #121212;
+      --text: #ffffff;
+    }
+
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .timer-box {
+      background: rgba(0, 128, 0, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .time {
+      font-size: 2em;
+      margin: 10px 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, button {
+      margin-top: 5px;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    button {
+      background-color: green;
+      color: white;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: chartreuse;
+      color: black;
+    }
+
+    .dark-toggle {
+      position: absolute;
+      margin-top: 20px;
+      background: #333;
+      color: white;
+      top:20px;
+      right: 20px;
+      width: 100px;
+    }
+
+    audio {
+      display: none;
+    }
+    .input-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+        justify-content: center;
+        align-items: center;
+        max-width: auto;
+        width: 100%;
+    }
+
+    .input-group input,
+        .input-group select {
+        flex: 1;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <audio id="beep-sound" src="https://actions.google.com/sounds/v1/transportation/ship_bell.ogg" preload="auto"></audio>
+
+  <div class="main-container">
+    <div class="timer-box">
+      <h1>Smart Timer</h1>
+      <div class="time" id="clock">00:00:00</div>
+      <div class="time" id="main-timer">00:00</div>
+      <div class="time" id="interval-timer">00:00</div>
+
+      <label for="timeValue">Set Total Time:</label>
+        <div class="input-group">
+        <input type="number" id="timeValue" placeholder="Enter time" />
+        <select id="timeUnit">
+            <option value="seconds">Sec</option>
+            <option value="minutes">Min</option>
+            <option value="hours">Hr</option>
+        </select>
+      </div>
+
+      <label for="intervalValue">Interval Time (seconds):</label>
+      <input type="number" id="intervalValue" placeholder="e.g. 10"/>
+
+      <button id="startBtn">Start</button>
+      <button id="resetBtn">Reset</button>
+      <button id="darkToggle" class="dark-toggle">Dark Mode</button>
+    </div>
+  </div>
+
+  <script>
+    const clock = document.getElementById("clock");
+    const mainTimer = document.getElementById("main-timer");
+    const intervalTimer = document.getElementById("interval-timer");
+    const beep = document.getElementById("beep-sound");
+
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const darkToggle = document.getElementById("darkToggle");
+
+    let totalTime = 0;
+    let intervalTime = 0;
+    let intervalElapsed = 0;
+    let countdownInterval;
+
+    // Real-time clock
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Format seconds to mm:ss
+    function formatTime(sec) {
+      const mins = String(Math.floor(sec / 60)).padStart(2, "0");
+      const secs = String(sec % 60).padStart(2, "0");
+      return `${mins}:${secs}`;
+    }
+
+    function startTimer() {
+      clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        if (totalTime <= 0) {
+          clearInterval(countdownInterval);
+          mainTimer.textContent = "00:00";
+          intervalTimer.textContent = "00:00";
+          localStorage.removeItem("timerState");
+          return;
+        }
+
+        totalTime--;
+        intervalElapsed++;
+
+        mainTimer.textContent = formatTime(totalTime);
+        intervalTimer.textContent = formatTime(intervalElapsed);
+
+        if (intervalElapsed >= intervalTime) {
+          beep.currentTime = 0;
+          beep.play();
+          intervalElapsed = 0;
+        }
+
+        // Save state to localStorage
+        localStorage.setItem("timerState", JSON.stringify({
+          totalTime,
+          intervalElapsed,
+          intervalTime
+        }));
+      }, 1000);
+    }
+
+    startBtn.addEventListener("click", () => {
+      const input = parseInt(document.getElementById("timeValue").value);
+      const unit = document.getElementById("timeUnit").value;
+      const intervalInput = parseInt(document.getElementById("intervalValue").value);
+
+      if (isNaN(input) || input <= 0 || isNaN(intervalInput) || intervalInput <= 0) {
+        alert("Please enter valid timer and interval values.");
+        return;
+      }
+
+      // Convert input to seconds
+      if (unit === "seconds") totalTime = input;
+      else if (unit === "minutes") totalTime = input * 60;
+      else if (unit === "hours") totalTime = input * 3600;
+
+      intervalTime = intervalInput;
+      intervalElapsed = 0;
+
+      mainTimer.textContent = formatTime(totalTime);
+      intervalTimer.textContent = formatTime(intervalElapsed);
+      startTimer();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      clearInterval(countdownInterval);
+      totalTime = 0;
+      intervalTime = 0;
+      intervalElapsed = 0;
+      mainTimer.textContent = "00:00";
+      intervalTimer.textContent = "00:00";
+      localStorage.removeItem("timerState");
+    });
+
+    // Dark mode toggle
+    function setTheme(dark) {
+      document.body.classList.toggle("dark", dark);
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    }
+
+    darkToggle.addEventListener("click", () => {
+      const isDark = document.body.classList.toggle("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    // Restore previous settings
+    window.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+      }
+
+      const savedState = localStorage.getItem("timerState");
+      if (savedState) {
+        const { totalTime: t, intervalElapsed: i, intervalTime: it } = JSON.parse(savedState);
+        totalTime = t;
+        intervalElapsed = i;
+        intervalTime = it;
+        mainTimer.textContent = formatTime(totalTime);
+        intervalTimer.textContent = formatTime(intervalElapsed);
+        startTimer();
+      }
+    });
+  </script>
+</body>
+</html>
