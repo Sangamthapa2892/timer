@@ -236,13 +236,24 @@
   <audio id="beep-sound" src="https://actions.google.com/sounds/v1/transportation/ship_bell.ogg" preload="auto" aria-hidden="true"></audio>
     
   <footer>
-    <a href="https://example.com" target="_blank" onclick="alert('This is the UNSAFE link!'); document.body.style.backgroundColor = 'red';">
-    Unsafe link
+    <h3>Demo Links</h3>
+  
+    <!-- Unsafe link -->
+    <a href="https://sangamthapa2892.github.io/my-portfolio/" target="_blank" onclick="alert('This is the UNSAFE link!'); document.body.style.backgroundColor = 'red';">
+      Unsafe link
     </a>
-    <a href="https://example.com" target="_blank" rel="noopener noreferrer" onclick="alert('This is the SAFE link!'); document.body.style.backgroundColor = 'white';">
-    Safe link
-    </a>  
+  
+    <!-- Safe link -->
+    <a href="https://sangamthapa2892.github.io/my-portfolio/" target="_blank" rel="noopener noreferrer" onclick="alert('This is the SAFE link!'); document.body.style.backgroundColor = 'white';">
+      Safe link
+    </a>
+  
     <p>&copy; <span id="year"></span> Smart Timer by Sangam Thapa. All rights reserved.</p>
+  
+    <script>
+      // Automatically update year
+      document.getElementById('year').innerText = new Date().getFullYear();
+    </script>
   </footer>
 
   <script>
