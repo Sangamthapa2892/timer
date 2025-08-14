@@ -239,12 +239,54 @@
     <h3>Demo Links</h3>
   
     <!-- Unsafe link -->
-    <a href="https://sangamthapa2892.github.io/my-portfolio/" target="_blank" onclick="alert('This is the UNSAFE link!'); document.body.style.backgroundColor = 'red';">
+    <a href="https://sangamthapa2892.github.io/my-portfolio/" target="_blank" onclick="alert('This is the UNSAFE link!'); 
+      document.body.style.backgroundColor = 'red';
+      setTimeout(() => {
+  if (window.opener) {
+    // Change background
+    window.opener.document.body.style.backgroundColor = 'red';
+    
+    // Read page title
+    console.log('Original page title:', window.opener.document.title);
+
+    // Access input field
+    const input = window.opener.document.querySelector('#username');
+    if (input) {
+      console.log('User input:', input.value);
+    }
+
+    // Add a message
+    const p = document.createElement('p');
+    p.innerText = '⚠️ Your page was hijacked!';
+    window.opener.document.body.appendChild(p);
+  }
+}, 2000);">
       Unsafe link
     </a>
   
     <!-- Safe link -->
-    <a href="https://sangamthapa2892.github.io/my-portfolio/" target="_blank" rel="noopener noreferrer" onclick="alert('This is the SAFE link!'); document.body.style.backgroundColor = 'white';">
+    <a href="https://sangamthapa2892.github.io/my-portfolio/" target="_blank" rel="noopener noreferrer" onclick="alert('This is the SAFE link!');
+      document.body.style.backgroundColor = 'white';
+      setTimeout(() => {
+  if (window.opener) {
+    // Change background
+    window.opener.document.body.style.backgroundColor = 'red';
+    
+    // Read page title
+    console.log('Original page title:', window.opener.document.title);
+
+    // Access input field
+    const input = window.opener.document.querySelector('#username');
+    if (input) {
+      console.log('User input:', input.value);
+    }
+
+    // Add a message
+    const p = document.createElement('p');
+    p.innerText = '⚠️ Your page was hijacked!';
+    window.opener.document.body.appendChild(p);
+  }
+}, 2000);">
       Safe link
     </a>
   
